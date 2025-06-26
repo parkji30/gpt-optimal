@@ -1,0 +1,8 @@
+[package]
+name = "rust-ml"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+burn = { version = "0.17.1", features = ["wgpu", "train", "dataset"] }
+rand = "0.8"
