@@ -6,9 +6,12 @@ In this repository, I wanted to investigate and discover, does training a Large 
 
 The model we will be recreating will be GPT2 as there are extensive resources and documentation around it (OpenAI paper, Karpathy Tutorial).
 
-# Assumptions
-
+# Goals
 - For this investigation, I will purely be benchmarking the (# of epochs) * (# of steps/iterations) on a target dataset. 
+- I will be using Burn (Rust package) and the PyTorch (Python Package) libraries to perform this experiment.
+- The goal is to try and show that writing a end-to-end package in Rust can be demonstrate a worthy enough speed up to switch frameworks from PyTorch.
+
+# Assumptions
 - Given that the backend of the optimization is different, I do expect to see slight discrepencies on the final evaluation metrics.
 - I will not consider development time as part of the total training time since we're just measuring performance here.
 
