@@ -1,8 +1,60 @@
 [package]
-name = "rust-ml"
+name = "rust-gpt"
 version = "0.1.0"
 edition = "2021"
+description = "GPT-2 implementation and training using the Burn deep learning framework"
+authors = ["GPT-Optimal Team"]
+license = "MIT"
+
+[features]
+default = ["wgpu"]
+wgpu = ["burn/wgpu"]
+cuda = ["burn/cuda"]
+tch = ["burn/tch"]
 
 [dependencies]
-burn = { version = "0.17.1", features = ["wgpu", "train", "dataset"] }
+# Burn deep learning framework with all necessary features
+burn = { version = "0.17.1", features = ["train", "dataset", "autodiff", "std"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Random number generation
 rand = "0.8"
+
+# Command line argument parsing
+clap = { version = "4.4", features = ["derive"] }
+
+# Logging
+log = "0.4"
+env_logger = "0.11"
+
+# Error handling
+thiserror = "2.0"
+anyhow = "1.0"
+
+[dev-dependencies]
+# Testing utilities
+rstest = "0.21"
+criterion = "0.5"
+
+[[bin]]
+name = "train"
+path = "src/bin/train.rs"
+
+[[bin]]
+name = "generate"
+path = "src/bin/generate.rs"
+
+[[bin]]
+name = "demo"
+path = "src/bin/demo.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+
+[profile.dev]
+opt-level = 1

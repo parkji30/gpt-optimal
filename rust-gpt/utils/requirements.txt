@@ -1,0 +1,15 @@
+# Requirements for data preparation utilities
+
+# Core dependencies
+requests>=2.28.0
+
+# HuggingFace libraries for dataset/tokenizer download
+datasets>=2.14.0
+transformers>=4.30.0
+
+# Optional: For faster tokenization
+tokenizers>=0.13.0
+
+# Optional: For progress bars
+tqdm>=4.65.0
+
