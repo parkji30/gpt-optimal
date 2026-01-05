@@ -182,7 +182,7 @@ impl<B: Backend> TextGenerator<B> {
             
             // Greedy selection
             let next_token_data = last_logits.argmax(0).into_data();
-            let next_token: usize = next_token_data.to_vec::<i64>().unwrap()[0] as usize;
+            let next_token: usize = next_token_data.to_vec::<i32>().unwrap()[0] as usize;
             
             if next_token == self.tokenizer.eos_token_id() {
                 break;

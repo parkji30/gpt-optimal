@@ -88,12 +88,12 @@ pub fn evaluate_model<B: Backend>(
         let pred_data = predictions.into_data();
         let target_data = targets_flat.clone().into_data();
         
-        let pred_vec: Vec<i64> = pred_data.to_vec().unwrap();
-        let target_vec: Vec<i64> = target_data.to_vec().unwrap();
+        let pred_vec: Vec<i32> = pred_data.to_vec().unwrap();
+        let target_vec: Vec<i32> = target_data.to_vec().unwrap();
         
         // Count correct predictions (ignoring padding)
         for (pred, target) in pred_vec.iter().zip(target_vec.iter()) {
-            if *target != pad_token_id as i64 {
+            if *target != pad_token_id as i32 {
                 total_tokens += 1;
                 if pred == target {
                     total_correct += 1;
