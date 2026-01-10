@@ -85,7 +85,6 @@ cargo run --bin generate -- --prompt "Hello world" --greedy
 ## Project Structure
 
 ```
-rust-gpt/
 ├── src/
 │   ├── lib.rs              # Library exports
 │   ├── main.rs             # CLI entry point
@@ -163,5 +162,6 @@ See `utils/download_nemotron.py` for download options.
 ## License
 
 MIT
+
 
 
