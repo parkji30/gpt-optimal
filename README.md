@@ -8,8 +8,13 @@ The model we will be recreating will be GPT2 as there are extensive resources an
 
 # Goals
 - For this investigation, I will purely be benchmarking the (# of epochs) * (# of steps/iterations) on a target dataset.
+    - This consist of loading the data into a batch.
+    - Forward passing the batch.
+    - Obtaining the loss via the loss/cost function.
+    - Backpropagation to obtain the gradients.
+    - Step to update the parameters.
 - I will be using Burn (Rust package) and the PyTorch (Python Package) libraries to perform this experiment.
-- The goal is to try and show that writing a end-to-end package in Rust can be demonstrate a worthy enough speed up to switch frameworks from PyTorch.
+- The goal is to see if writing a end-to-end package in Rust can be demonstrate a worthy enough speed up to switch frameworks from PyTorch.
 
 # Assumptions
 - Given that the backend of the optimization is different, I do expect to see slight discrepencies on the final evaluation metrics.
