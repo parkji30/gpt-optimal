@@ -14,7 +14,8 @@ ndarray = ["burn/ndarray"]
 amp = []
 
 [dependencies]
-burn = { version = "0.18", default-features = false, features = ["train"] }
+# Use burn from main branch for latest features
+burn = { git = "https://github.com/tracel-ai/burn", branch = "main", default-features = false, features = ["train"] }
 half = "2.4"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -28,3 +29,20 @@ panic = "abort"
 
 [profile.dev]
 opt-level = 1  # Slightly optimize even in dev for faster iteration
+
+# Patch cubecl to use local clone with cudarc 0.19.0 for CUDA 12.8 compatibility
+# The pinned cubecl revision in burn uses cudarc 0.18.2 which has a symbol lookup issue
+# with CUDA 12.x (cuCtxGetDevice_v2 doesn't exist - the _v2 suffix was removed)
+[patch."https://github.com/tracel-ai/cubecl"]
+cubecl = { path = "../cubecl-local/crates/cubecl" }
+cubecl-core = { path = "../cubecl-local/crates/cubecl-core" }
+cubecl-cuda = { path = "../cubecl-local/crates/cubecl-cuda" }
+cubecl-cpp = { path = "../cubecl-local/crates/cubecl-cpp" }
+cubecl-runtime = { path = "../cubecl-local/crates/cubecl-runtime" }
+cubecl-opt = { path = "../cubecl-local/crates/cubecl-opt" }
+cubecl-std = { path = "../cubecl-local/crates/cubecl-std" }
+cubecl-common = { path = "../cubecl-local/crates/cubecl-common" }
+cubecl-ir = { path = "../cubecl-local/crates/cubecl-ir" }
+cubecl-zspace = { path = "../cubecl-local/crates/cubecl-zspace" }
+cubecl-macros = { path = "../cubecl-local/crates/cubecl-macros" }
+cubecl-macros-internal = { path = "../cubecl-local/crates/cubecl-macros-internal" }

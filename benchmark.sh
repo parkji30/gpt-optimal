@@ -54,7 +54,7 @@ if [ -d ".venv" ]; then
 fi
 
 # Capture Python output
-PYTHON_OUTPUT=$(python gpt2.py 2>&1)
+PYTHON_OUTPUT=$(python3 gpt2.py 2>&1)
 echo "$PYTHON_OUTPUT"
 
 # Extract Python metrics
@@ -76,13 +76,21 @@ echo ""
 
 cd "$SCRIPT_DIR/gpt2-rust"
 
-# Build and run in release mode
-RUST_OUTPUT=$(cargo run --release 2>&1)
+# Build in release mode (compile time not counted in benchmark)
+# Use --features cuda,amp for systems with CUDA driver 550+ supporting mixed precision
+echo -e "${YELLOW}Building Rust project (not counted in benchmark)...${NC}"
+cargo build --release --features amp 2>&1 | tail -5
+
+# Run the prebuilt binary
+RUST_OUTPUT=$(./target/release/gpt2-rust 2>&1)
 echo "$RUST_OUTPUT"
 
 # Extract Rust metrics
 RUST_METRICS=$(extract_metrics "$RUST_OUTPUT")
 IFS='|' read -r RS_TRAIN_LOSS RS_VAL_LOSS RS_TIME RS_PARAMS <<< "$RUST_METRICS"
+
+# Detect backend type (AMP or f32)
+RS_BACKEND=$(echo "$RUST_OUTPUT" | grep -E "^Using" | head -1 | sed 's/Using //' | sed 's/ backend//')
 
 echo ""
 echo -e "${YELLOW}Rust training completed!${NC}"
@@ -101,8 +109,8 @@ cat >> "$RESULTS_FILE" << EOF
     "parameters": $PY_PARAMS
   },
   "rust": {
-    "framework": "Burn (CUDA)",
-    "device": "CUDA",
+    "framework": "Burn",
+    "backend": "$RS_BACKEND",
     "training_time_seconds": $RS_TIME,
     "final_train_loss": $RS_TRAIN_LOSS,
     "final_val_loss": $RS_VAL_LOSS,
@@ -123,10 +131,10 @@ echo -e "${BLUE}=============================================${NC}"
 echo -e "${BLUE}              BENCHMARK RESULTS              ${NC}"
 echo -e "${BLUE}=============================================${NC}"
 echo ""
-printf "%-20s %15s %15s\n" "Metric" "Python" "Rust"
-printf "%-20s %15s %15s\n" "--------------------" "---------------" "---------------"
-printf "%-20s %15s %15s\n" "Framework" "PyTorch" "Burn (CUDA)"
-printf "%-20s %15s %15s\n" "Device" "$PY_DEVICE" "CUDA"
+printf "%-20s %15s %20s\n" "Metric" "Python" "Rust"
+printf "%-20s %15s %20s\n" "--------------------" "---------------" "--------------------"
+printf "%-20s %15s %20s\n" "Framework" "PyTorch" "Burn"
+printf "%-20s %15s %20s\n" "Backend" "$PY_DEVICE" "$RS_BACKEND"
 printf "%-20s %15ss %15ss\n" "Training Time" "$PY_TIME" "$RS_TIME"
 printf "%-20s %15s %15s\n" "Final Train Loss" "$PY_TRAIN_LOSS" "$RS_TRAIN_LOSS"
 printf "%-20s %15s %15s\n" "Final Val Loss" "$PY_VAL_LOSS" "$RS_VAL_LOSS"
