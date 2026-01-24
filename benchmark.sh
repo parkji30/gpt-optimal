@@ -76,10 +76,25 @@ echo ""
 
 cd "$SCRIPT_DIR/gpt2-rust"
 
-# Build in release mode (compile time not counted in benchmark)
-# Use --features cuda,amp for systems with CUDA driver 550+ supporting mixed precision
+# Detect CUDA availability and build accordingly
+# Try CUDA first, fall back to CPU if CUDA driver is incompatible
 echo -e "${YELLOW}Building Rust project (not counted in benchmark)...${NC}"
-cargo build --release --features amp 2>&1 | tail -5
+
+# Check if CUDA is available and working by checking nvidia-smi
+if command -v nvidia-smi &> /dev/null && nvidia-smi &> /dev/null; then
+    echo -e "${YELLOW}CUDA detected, building with CUDA backend...${NC}"
+    cargo build --release --features amp 2>&1 | tail -3
+    
+    # Test if CUDA works by running a quick check
+    RUST_TEST_OUTPUT=$(timeout 10 ./target/release/gpt2-rust 2>&1 || true)
+    if echo "$RUST_TEST_OUTPUT" | grep -q "undefined symbol\|CUDA\|panic"; then
+        echo -e "${YELLOW}CUDA driver incompatible, rebuilding with CPU backend...${NC}"
+        cargo build --release --no-default-features --features "cpu,amp" 2>&1 | tail -3
+    fi
+else
+    echo -e "${YELLOW}No CUDA detected, building with CPU backend...${NC}"
+    cargo build --release --no-default-features --features "cpu,amp" 2>&1 | tail -3
+fi
 
 # Run the prebuilt binary
 RUST_OUTPUT=$(./target/release/gpt2-rust 2>&1)

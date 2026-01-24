@@ -10,7 +10,7 @@
     "training": {
         "batch_size": 32,
         "learning_rate": 3e-4,
-        "max_iters": 1000,
+        "max_iters": 3000,
         "eval_interval": 200,
         "eval_iters": 100,
         "gradient_accumulation_steps": 1,

@@ -4,6 +4,54 @@ This file tracks performance optimizations made to the GPT-2 training implementa
 
 ---
 
+## 2026-01-24 | Rust GPT-2 Implementation
+
+### Complete GPT-2 Training Loop in Rust using Burn
+
+**Files Created:**
+- `gpt2-rust/Cargo.toml` - Project dependencies (burn 0.20, burn-cuda, serde)
+- `gpt2-rust/src/main.rs` - Entry point
+- `gpt2-rust/src/config.rs` - Configuration structures matching Python
+- `gpt2-rust/src/model.rs` - GPT-2 model architecture
+- `gpt2-rust/src/attention.rs` - Custom Flash Attention implementation
+- `gpt2-rust/src/amp.rs` - Custom Automatic Mixed Precision (GradScaler)
+- `gpt2-rust/src/dataset.rs` - Character-level dataset and DataLoader
+- `gpt2-rust/src/training.rs` - Training loop with LR scheduling
+
+**Features Implemented:**
+
+| Component | Description |
+|-----------|-------------|
+| Flash Attention | Custom tiled attention algorithm with O(N) memory via online softmax |
+| AMP/GradScaler | Dynamic gradient scaling with overflow detection and automatic scale adjustment |
+| GPT-2 Model | Token/position embeddings, transformer blocks with pre-norm, MLP with GELU |
+| LR Schedule | Linear warmup + cosine decay matching Python implementation |
+| Gradient Accumulation | Support for accumulating gradients over multiple micro-steps |
+| Text Generation | Autoregressive generation with temperature and top-k sampling |
+
+**Custom Flash Attention Details:**
+- Implements tiled computation with configurable block size (64)
+- Online softmax with running max/sum statistics for numerical stability
+- Supports causal masking for autoregressive models
+- Falls back to standard attention for short sequences (≤128 tokens)
+
+**Custom AMP Details:**
+- GradScaler with configurable init_scale, growth_factor, backoff_factor
+- Overflow detection via gradient tensor sum checking
+- Automatic scale growth after N successful steps
+- Scale reduction on gradient overflow
+
+**Test Coverage:**
+- 18 unit tests covering all modules
+- Tests for attention, model forward/backward, LR schedule, dataset, AMP
+
+**Notes:**
+- Uses burn-cuda for CUDA backend support
+- Identical training loop structure to Python version
+- Reads same config.json as Python implementation
+
+---
+
 ## 2026-01-24 | `5ebc38b`
 
 ### PyTorch Training Loop Optimizations
