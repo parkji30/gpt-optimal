@@ -31,13 +31,13 @@ struct ModelConfig {
     n_head: usize,
     n_layer: usize,
     block_size: usize,
-    dropout: f64,
+    dropout: f32,
 }
 
 #[derive(Deserialize)]
 struct TrainingConfig {
     batch_size: usize,
-    learning_rate: f64,
+    learning_rate: f32,
     max_iters: usize,
     eval_interval: usize,
     eval_iters: usize,
@@ -45,7 +45,7 @@ struct TrainingConfig {
 
 #[derive(Deserialize)]
 struct DataConfig {
-    train_split: f64,
+    train_split: f32,
     path: String,
 }
 
@@ -53,7 +53,7 @@ struct DataConfig {
 struct GenerationConfig {
     max_new_tokens: usize,
     #[allow(dead_code)]
-    temperature: f64,
+    temperature: f32,
 }
 
 /// GPT-2 Configuration
@@ -65,7 +65,7 @@ pub struct Gpt2Config {
     pub n_layer: usize,
     pub block_size: usize,
     #[config(default = 0.1)]
-    pub dropout: f64,
+    pub dropout: f32,
 }
 
 impl Gpt2Config {
@@ -96,7 +96,7 @@ impl Gpt2Config {
         let lm_head = LinearConfig::new(self.n_embd, self.vocab_size)
             .with_bias(false)
             .init(device);
-        let dropout = DropoutConfig::new(self.dropout).init();
+        let dropout = DropoutConfig::new(self.dropout as f64).init();
 
         Gpt2Model {
             token_embedding,
@@ -208,14 +208,14 @@ pub struct TransformerBlockConfig {
     pub n_embd: usize,
     pub n_head: usize,
     #[config(default = 0.1)]
-    pub dropout: f64,
+    pub dropout: f32,
 }
 
 impl TransformerBlockConfig {
     pub fn init<B: Backend>(&self, device: &B::Device) -> TransformerBlock<B> {
         let ln1 = LayerNormConfig::new(self.n_embd).init(device);
         let attn = MultiHeadAttentionConfig::new(self.n_embd, self.n_head)
-            .with_dropout(self.dropout)
+            .with_dropout(self.dropout as f64)
             .init(device);
         let ln2 = LayerNormConfig::new(self.n_embd).init(device);
         let mlp = MlpConfig::new(self.n_embd).with_dropout(self.dropout).init(device);
@@ -262,14 +262,14 @@ impl<B: Backend> TransformerBlock<B> {
 pub struct MlpConfig {
     pub n_embd: usize,
     #[config(default = 0.1)]
-    pub dropout: f64,
+    pub dropout: f32,
 }
 
 impl MlpConfig {
     pub fn init<B: Backend>(&self, device: &B::Device) -> Mlp<B> {
         let c_fc = LinearConfig::new(self.n_embd, 4 * self.n_embd).init(device);
         let c_proj = LinearConfig::new(4 * self.n_embd, self.n_embd).init(device);
-        let dropout = DropoutConfig::new(self.dropout).init();
+        let dropout = DropoutConfig::new(self.dropout as f64).init();
 
         Mlp {
             c_fc,
@@ -394,7 +394,7 @@ fn train<B: AutodiffBackend>(config_path: &str, device: &B::Device) {
     println!("Loaded {} characters", text.len());
 
     // Train/val split
-    let n = (text.len() as f64 * config.data.train_split) as usize;
+    let n = (text.len() as f32 * config.data.train_split) as usize;
     let train_data = CharDataset::new(&text[..n], model_config.block_size);
     let val_data = CharDataset::new(&text[n..], model_config.block_size);
     println!(
@@ -439,7 +439,7 @@ fn train<B: AutodiffBackend>(config_path: &str, device: &B::Device) {
         // Backward pass
         let grads = loss.backward();
         let grads = GradientsParams::from_grads(grads, &model);
-        model = optim.step(config.training.learning_rate, model, grads);
+        model = optim.step(config.training.learning_rate as f64, model, grads);
     }
     let training_duration = training_start.elapsed();
 
@@ -486,13 +486,25 @@ fn main() {
     let config_path = "../hyperparams/config.json";
 
     // Select backend based on feature flags
-    #[cfg(feature = "cuda")]
+    // AMP (Automatic Mixed Precision) uses f16 for faster training on modern GPUs
+    #[cfg(all(feature = "cuda", feature = "amp"))]
+    {
+        use burn::backend::cuda::{Cuda, CudaDevice};
+        use half::f16;
+        type MyBackend = Cuda<f16, i32>;
+        type MyAutodiffBackend = burn::backend::Autodiff<MyBackend>;
+        let device = CudaDevice::default();
+        println!("Using CUDA backend with AMP (f16)");
+        train::<MyAutodiffBackend>(config_path, &device);
+    }
+
+    #[cfg(all(feature = "cuda", not(feature = "amp")))]
     {
         use burn::backend::cuda::{Cuda, CudaDevice};
         type MyBackend = Cuda<f32, i32>;
         type MyAutodiffBackend = burn::backend::Autodiff<MyBackend>;
         let device = CudaDevice::default();
-        println!("Using CUDA backend");
+        println!("Using CUDA backend (f32)");
         train::<MyAutodiffBackend>(config_path, &device);
     }
 

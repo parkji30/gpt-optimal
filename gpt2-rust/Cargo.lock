@@ -1824,6 +1824,7 @@ name = "gpt2-rust"
 version = "0.1.0"
 dependencies = [
  "burn",
+ "half",
  "rand 0.8.5",
  "serde",
  "serde_json",
