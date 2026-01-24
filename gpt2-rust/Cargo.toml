@@ -4,16 +4,17 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = ["cuda", "amp"]
+default = ["cuda"]
 # GPU backend:
 cuda = ["burn/cuda", "burn/fusion", "burn/autotune"]
 # CPU backend:
 ndarray = ["burn/ndarray"]
-# Automatic Mixed Precision (uses f16 for forward/backward, f32 for optimizer):
+# Automatic Mixed Precision (uses f16 for forward/backward, f32 for optimizer)
+# Requires CUDA driver 550+ with Green Contexts support
 amp = []
 
 [dependencies]
-burn = { version = "0.20", default-features = false, features = ["train"] }
+burn = { version = "0.18", default-features = false, features = ["train"] }
 half = "2.4"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
