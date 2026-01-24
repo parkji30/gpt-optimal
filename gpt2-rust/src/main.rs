@@ -57,7 +57,7 @@ struct GenerationConfig {
 }
 
 /// GPT-2 Configuration
-#[derive(Config)]
+#[derive(Config, Debug)]
 pub struct Gpt2Config {
     pub vocab_size: usize,
     pub n_embd: usize,
@@ -203,7 +203,7 @@ impl<B: Backend> Gpt2Model<B> {
 }
 
 /// Transformer Block Configuration
-#[derive(Config)]
+#[derive(Config, Debug)]
 pub struct TransformerBlockConfig {
     pub n_embd: usize,
     pub n_head: usize,
@@ -258,7 +258,7 @@ impl<B: Backend> TransformerBlock<B> {
 }
 
 /// MLP Configuration
-#[derive(Config)]
+#[derive(Config, Debug)]
 pub struct MlpConfig {
     pub n_embd: usize,
     #[config(default = 0.1)]
@@ -482,14 +482,27 @@ fn train<B: AutodiffBackend>(config_path: &str, device: &B::Device) {
 }
 
 fn main() {
-    // Use WGPU backend for GPU acceleration
-    type MyBackend = burn::backend::wgpu::Wgpu<f32, i32>;
-    type MyAutodiffBackend = burn::backend::Autodiff<MyBackend>;
-
-    // Initialize WGPU device (will use GPU if available)
-    let device = burn::backend::wgpu::WgpuDevice::default();
-
     // Get config path relative to executable
     let config_path = "../hyperparams/config.json";
-    train::<MyAutodiffBackend>(config_path, &device);
+
+    // Select backend based on feature flags
+    #[cfg(feature = "cuda")]
+    {
+        use burn::backend::cuda::{Cuda, CudaDevice};
+        type MyBackend = Cuda<f32, i32>;
+        type MyAutodiffBackend = burn::backend::Autodiff<MyBackend>;
+        let device = CudaDevice::default();
+        println!("Using CUDA backend");
+        train::<MyAutodiffBackend>(config_path, &device);
+    }
+
+    #[cfg(feature = "ndarray")]
+    {
+        use burn::backend::ndarray::{NdArray, NdArrayDevice};
+        type MyBackend = NdArray<f32>;
+        type MyAutodiffBackend = burn::backend::Autodiff<MyBackend>;
+        let device = NdArrayDevice::Cpu;
+        println!("Using NdArray backend (CPU only)");
+        train::<MyAutodiffBackend>(config_path, &device);
+    }
 }
