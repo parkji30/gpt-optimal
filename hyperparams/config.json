@@ -1,0 +1,25 @@
+{
+    "model": {
+        "vocab_size": 256,
+        "n_embd": 128,
+        "n_head": 4,
+        "n_layer": 4,
+        "block_size": 128,
+        "dropout": 0.1
+    },
+    "training": {
+        "batch_size": 32,
+        "learning_rate": 3e-4,
+        "max_iters": 1000,
+        "eval_interval": 200,
+        "eval_iters": 100
+    },
+    "data": {
+        "train_split": 0.9,
+        "path": "../data/shakespeare.txt"
+    },
+    "generation": {
+        "max_new_tokens": 500,
+        "temperature": 0.8
+    }
+}
