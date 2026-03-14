@@ -5,6 +5,11 @@ In this repository, I wanted to investigate and discover the following- "Does tr
 
 The model we will be recreating will be GPT2 as there are extensive resources and documentation around it (OpenAI paper, Karpathy Tutorial).
 
+Update (Mar 14, 2026)
+Yeah, just stick with PyTorch moving forward. It's only going to get better. Learn Rust if want to learn systems level programming and other high performance related tasks.
+<img width="878" height="276" alt="image" src="https://github.com/user-attachments/assets/e139fad6-ad5a-4777-966e-c1d6abc34228" />
+
+
 # Goals
 For this investigation, I will purely be benchmarking the (# of epochs) * (# of steps/iterations) on a target dataset.
 This consist of loading the data into a batch.
