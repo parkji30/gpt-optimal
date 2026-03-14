@@ -1,0 +1,2 @@
+timestamp,py_time,py_train_loss,py_val_loss,rs_time,rs_train_loss,rs_val_loss,winner
+20260124_165503,21.27,2.0641,2.1050,66.27,2.2184,2.2466,python

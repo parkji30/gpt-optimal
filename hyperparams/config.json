@@ -1,0 +1,49 @@
+{
+    "model": {
+        "vocab_size": 256,
+        "n_embd": 128,
+        "n_head": 4,
+        "n_layer": 4,
+        "block_size": 128,
+        "dropout": 0.1
+    },
+    "training": {
+        "batch_size": 32,
+        "learning_rate": 3e-4,
+        "max_iters": 3000,
+        "eval_interval": 200,
+        "eval_iters": 100,
+        "gradient_accumulation_steps": 1,
+        "max_grad_norm": 1.0,
+        "warmup_iters": 100,
+        "lr_decay_iters": 1000,
+        "min_lr": 3e-5
+    },
+    "data": {
+        "train_split": 0.9,
+        "path": "../data/shakespeare.txt"
+    },
+    "generation": {
+        "max_new_tokens": 500,
+        "temperature": 0.8
+    },
+    "amp": {
+        "enabled": true,
+        "init_scale": 65536,
+        "growth_factor": 2.0,
+        "backoff_factor": 0.5,
+        "growth_interval": 2000
+    },
+    "optimization": {
+        "compile": true,
+        "compile_mode": "default",
+        "cudnn_benchmark": true,
+        "tf32": true,
+        "flash_attention": true,
+        "fused_optimizer": true,
+        "pin_memory": true,
+        "num_workers": 2,
+        "persistent_workers": true,
+        "prefetch_factor": 2
+    }
+}

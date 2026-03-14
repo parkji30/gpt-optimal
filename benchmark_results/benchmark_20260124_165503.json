@@ -1,0 +1,25 @@
+{
+  "timestamp": "20260124_165503",
+  "config": "/home/ubuntu/repos/gpt-optimal/hyperparams/config.json",
+  "python": {
+    "framework": "PyTorch",
+    "device": "cuda",
+    "training_time_seconds": 21.27,
+    "final_train_loss": 2.0641,
+    "final_val_loss": 2.1050,
+    "parameters": 842496
+  },
+  "rust": {
+    "framework": "Burn",
+    "backend": "Using CUDA backend (f32)",
+    "training_time_seconds": 66.27,
+    "final_train_loss": 2.2184,
+    "final_val_loss": 2.2466,
+    "parameters": 875264
+  },
+  "comparison": {
+    "time_ratio_rust_vs_python": 3.1156,
+    "faster_framework": "python",
+    "time_difference_seconds": 45.00
+  }
+}
